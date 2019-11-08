@@ -32,6 +32,18 @@ describe Admin::CategoriesController do
       assert assigns(:category).valid?
       assigns(:categories).should_not be_nil
     end
+    
+    it 'should edit category correctly ' do
+      test_edit = Factory(:category)
+      post :edit, :id => test_edit.id,
+        :category => {:name => "a", :keywords => "b", :permalink => "c", :description => "d"}
+      category = Category.find(test_edit.id)
+      category.id.should eq test_edit.id
+      category.name.should eq "a"
+      category.keywords.should eq "b"
+      category.permalink.should eq "c"
+      category.description.should eq "d"
+    end
   end
 
   it "test_update" do
@@ -61,6 +73,21 @@ describe Admin::CategoriesController do
     assert_response :redirect, :action => 'index'
 
     assert_raise(ActiveRecord::RecordNotFound) { Category.find(test_id) }
+  end
+  
+  describe "test_new" do
+    it 'should render template new' do
+      get :new
+      assert_template 'new'
+      assert_tag :tag => "table",
+        :attributes => { :id => "category_container" }
+    end
+
+    it 'should create a correct new category' do
+      post :new, :category => {:name => "a", :keywords => "b", :permalink => "c", :description => "d"}
+      category = Category.where(name: "a", keywords: "b", permalink: "c", description: "d")
+      category.should_not be_nil 
+    end
   end
   
 end
